@@ -366,9 +366,8 @@ function fotoCapa(p) { return (p.imagens && p.imagens[0]) || ''; }
 function htmlPrecos(p) {
   if (p.preco_pix == null) return `<div class="preco-consultar">Consulte o valor</div>`;
   const cada = p.por_unidade ? ' cada' : '';
-  const nota = p.por_unidade ? 'preço por unidade' : 'parcele no cartão';
   const plat = p.preco_plataforma != null && p.preco_plataforma !== p.preco_pix
-    ? `<div class="preco-plataforma"><span>Nas plataformas<span class="nota">${nota}</span></span><span class="valor">${formataPreco(p.preco_plataforma)}${cada}</span></div>` : '';
+    ? `<div class="preco-plataforma"><span>Nas plataformas</span><span class="valor">${formataPreco(p.preco_plataforma)}${cada}</span></div>` : '';
   return `<div class="precos"><div class="preco-pix">${formataPreco(p.preco_pix)}<span class="rot">${cada} no Pix</span></div>${plat}</div>`;
 }
 function cartaoProduto(p) {
