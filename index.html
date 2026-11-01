@@ -294,7 +294,7 @@ const RESERVA_URL = "https://chibi-reservas.chibitoys.workers.dev";             
 const TURNSTILE_SITEKEY = "0x4AAAAAAFvSc6YMnjm-tOpo";     // chave PUBLICA do anti-robo (a secreta fica so no Cloudflare)
 const RESERVA_ATIVA = !!(RESERVA_URL && TURNSTILE_SITEKEY);
 const CHAVE_RESERVAS = "chibitoys_reservas_v1";
-const RESERVA_HORAS = 3;   // tem que ser igual ao HORAS_RESERVA do reserva/worker.js
+const RESERVA_HORAS = 6;   // tem que ser igual ao HORAS_RESERVA do reserva/worker.js
 function carregaMinhasReservas() {   // pecas que ESTE visitante reservou (id -> quando vence), pra nao aparecerem como "reservado por outra pessoa"
   try {
     const r = JSON.parse(localStorage.getItem(CHAVE_RESERVAS) || "{}");
