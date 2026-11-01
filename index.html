@@ -947,7 +947,8 @@ async function aplicaStatusDoEstoque() {   // esconde o que foi vendido e marca 
     const r = await fetchComTempo(RESERVA_URL + '/status', {}, 6000);
     if (!r.ok) return;
     const s = await r.json();
-    const vendidos = new Set(s.vendidos || []), reservados = new Set(s.reservados || []);
+    // some do catalogo: vendidas + as que viraram "Consultar" ou "Fora do catalogo" depois da publicacao ("ocultos", Worker novo)
+    const vendidos = new Set([...(s.vendidos || []), ...(s.ocultos || [])]), reservados = new Set(s.reservados || []);
     for (let i = PRODUTOS.length - 1; i >= 0; i--) if (vendidos.has(PRODUTOS[i].id)) PRODUTOS.splice(i, 1);
     PRODUTOS.forEach(p => { p.reservado = reservados.has(p.id) && !minhasReservas[p.id]; });
     carrinho = carrinho.filter(n => { const p = PRODUTOS.find(x => x.nome === n); return p && !p.reservado; });
