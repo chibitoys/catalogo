@@ -871,13 +871,14 @@ async function pegaTokenTurnstile() {
   return new Promise(resolve => {
     let fechado = false;
     const fim = t => { if (fechado) return; fechado = true; clearTimeout(timer); entregaToken = null; resolve(t || null); };
-    const timer = setTimeout(() => fim(null), 20000);
+    const timer = setTimeout(() => fim(null), 45000);   // da tempo de uma pessoa marcar a caixinha, se o anti-robo pedir
     entregaToken = fim;
     if (turnstileId === null) {
       turnstileId = window.turnstile.render('#turnstile-box', {
         sitekey: TURNSTILE_SITEKEY, execution: 'execute', appearance: 'interaction-only',
         callback: t => entregaToken && entregaToken(t),
-        'error-callback': () => entregaToken && entregaToken(null),
+        'before-interactive-callback': () => mostraToast('Marque a caixinha "Confirme que é humano" acima do botão para reservar suas peças.'),
+        'error-callback': (codigo) => { console.warn('Turnstile: erro', codigo); return entregaToken && entregaToken(null); },
         'timeout-callback': () => entregaToken && entregaToken(null),
       });
     } else { window.turnstile.reset(turnstileId); }
@@ -932,7 +933,7 @@ document.getElementById('btn-whatsapp').addEventListener('click', async (e) => {
   reservaEmAndamento = false; rotulo.textContent = original;
   if (!aplicaResultadoReserva(res)) return;
   const w = window.open(btn.href, '_blank');   // o href ja foi refeito por renderCarrinho (com o aviso de reserva)
-  if (w) { w.opener = null; } else { mostraToast('Peças reservadas! Toque de novo no botão para abrir o WhatsApp.'); }
+  if (w) { w.opener = null; } else { mostraToast(res.estado === 'ok' ? 'Peças reservadas! Toque de novo no botão para abrir o WhatsApp.' : 'Toque de novo no botão para abrir o WhatsApp.'); }
 });
 async function aplicaStatusDoEstoque() {   // esconde o que foi vendido e marca o que esta reservado, sem precisar republicar o catalogo
   if (!RESERVA_URL) return;
