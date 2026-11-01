@@ -45,7 +45,15 @@ img { max-width: 100%; display: block; }
 .hero-stat .num { font-size: 30px; font-weight: 700; color: var(--brand-blue); font-variant-numeric: tabular-nums; line-height: 1; }
 .hero-stat .lbl { font-size: 12.5px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.06em; }
 .filtros { position: sticky; top: 0; z-index: 20; background: var(--bg); border-bottom: 1px solid var(--border); padding: 14px 0; }
-.filtros-wrap { position: relative; }
+.filtros-wrap { position: relative; display: flex; align-items: center; gap: 12px; }
+.filtros-fixos { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; padding-bottom: 6px; }   /* busca e ordenar: NAO rolam com as categorias */
+.filtros-rolagem { position: relative; flex: 1 1 auto; min-width: 0; }
+@media (max-width: 640px) {
+  .filtros-wrap { flex-wrap: wrap; gap: 8px; }
+  .filtros-fixos { flex: 1 1 100%; padding-bottom: 0; }
+  .filtros-fixos .busca { flex: 1 1 auto; }
+  .filtros-rolagem { flex: 1 1 100%; }
+}
 .filtros-inner { display: flex; gap: 10px; align-items: center; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 6px; transition: mask-image 0.15s, -webkit-mask-image 0.15s; }
 .filtros-inner::-webkit-scrollbar { height: 6px; }
 .filtros-inner::-webkit-scrollbar-track { background: transparent; }
@@ -210,7 +218,7 @@ main { padding: 24px 0 100px; }
 </header>
 <div class="filtros">
   <div class="wrap filtros-wrap">
-    <div class="filtros-inner" id="filtros-inner">
+    <div class="filtros-fixos">
       <label class="busca">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
         <input type="text" id="campo-busca" placeholder="Buscar produto…">
@@ -221,8 +229,11 @@ main { padding: 24px 0 100px; }
         <option value="maior">Maior preço</option>
       </select>
     </div>
-    <button class="filtros-seta esquerda" id="seta-filtros-esq" aria-label="Rolar categorias para a esquerda" type="button">‹</button>
-    <button class="filtros-seta direita" id="seta-filtros-dir" aria-label="Rolar categorias para a direita" type="button">›</button>
+    <div class="filtros-rolagem">
+      <div class="filtros-inner" id="filtros-inner"></div>
+      <button class="filtros-seta esquerda" id="seta-filtros-esq" aria-label="Rolar categorias para a esquerda" type="button">‹</button>
+      <button class="filtros-seta direita" id="seta-filtros-dir" aria-label="Rolar categorias para a direita" type="button">›</button>
+    </div>
   </div>
 </div>
 <main class="wrap">
@@ -290,6 +301,7 @@ const MESSENGER_ID = "100008175395097";
 const LINK_FACEBOOK_CHAT_PC = "https://www.facebook.com/messages/t/100001987336823";
 const LINK_INSTAGRAM = "https://ig.me/m/chibi.toysbr";
 const DIAS_RECENTE = 30;
+const RENOMEADOS = {"Miniatura Macaco": "Macaco KFP Braços Cruzados", "Boneca Batgirl": "Batgirl", "Boneca Fada do McDonald's": "Fada MCD", "Boneca Pópis": "Pópis", "Boneco Freeza Dourado": "Freeza Dourado", "Boneco Suga BTS": "Suga BTS", "Boneco do Flash": "Flash", "Mini Boneco Macaco Bombeiro com Veículo Rosa": "Macaco Bombeiro com Veículo Rosa", "Miniatura Buzz Lightyear": "Buzz Lightyear", "Miniatura Cat Noir": "Cat Noir", "Miniatura Duende Verde": "Duende Verde", "Miniatura Garfield": "Garfield", "Miniatura Homem de Ferro": "Homem de Ferro", "Miniatura do Sonic": "Sonic", "Toad Chaveiro McD": "Toad Chaveiro MCD"};                   // {nome antigo: nome atual}: o carrinho salvo de quem visita migra sozinho quando uma peca e renomeada
 const RESERVA_URL = "https://chibi-reservas.chibitoys.workers.dev";                 // "" = reserva automatica desligada
 const TURNSTILE_SITEKEY = "0x4AAAAAAFvSc6YMnjm-tOpo";     // chave PUBLICA do anti-robo (a secreta fica so no Cloudflare)
 const RESERVA_ATIVA = !!(RESERVA_URL && TURNSTILE_SITEKEY);
@@ -313,6 +325,7 @@ function carregaCarrinho() { try { const raw = localStorage.getItem(CHAVE_CARRIN
 function salvaCarrinho(lista) { try { localStorage.setItem(CHAVE_CARRINHO, JSON.stringify(lista)); } catch (e) {} }
 let carrinho = carregaCarrinho();
 // limpa do carrinho salvo no navegador os produtos que nao existem mais no catalogo (vendidos/tirados) e o resto do cupom antigo
+carrinho = carrinho.map(n => RENOMEADOS[n] || n).filter((n, i, a) => a.indexOf(n) === i);   // peca renomeada: segue no carrinho com o nome novo
 carrinho = carrinho.filter(n => PRODUTOS.some(p => p.nome === n));
 salvaCarrinho(carrinho);
 try { localStorage.removeItem("chibitoys_cupom_v1"); } catch (e) {}
@@ -452,6 +465,7 @@ function renderGrid() {
 const CHAVE_QTDS = "chibitoys_qtds_v1";
 let quantidades = {};
 try { quantidades = JSON.parse(localStorage.getItem(CHAVE_QTDS) || "{}") || {}; } catch (e) { quantidades = {}; }
+Object.keys(quantidades).forEach(k => { if (RENOMEADOS[k]) { quantidades[RENOMEADOS[k]] = quantidades[k]; delete quantidades[k]; } });   // quantidades de peca renomeada
 Object.keys(quantidades).forEach(k => { if (!carrinho.includes(k)) delete quantidades[k]; });
 function salvaQtds() { try { localStorage.setItem(CHAVE_QTDS, JSON.stringify(quantidades)); } catch (e) {} }
 function qtdDe(p) { return p && p.por_unidade ? Math.max(1, Math.min(99, quantidades[p.nome] || 1)) : 1; }
