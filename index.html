@@ -265,6 +265,10 @@ function formataPreco(v) { return "R$ " + v.toLocaleString('pt-BR', { minimumFra
 function carregaCarrinho() { try { const raw = localStorage.getItem(CHAVE_CARRINHO); return raw ? JSON.parse(raw) : []; } catch (e) { return []; } }
 function salvaCarrinho(lista) { try { localStorage.setItem(CHAVE_CARRINHO, JSON.stringify(lista)); } catch (e) {} }
 let carrinho = carregaCarrinho();
+// limpa do carrinho salvo no navegador os produtos que nao existem mais no catalogo (vendidos/tirados) e o resto do cupom antigo
+carrinho = carrinho.filter(n => PRODUTOS.some(p => p.nome === n));
+salvaCarrinho(carrinho);
+try { localStorage.removeItem("chibitoys_cupom_v1"); } catch (e) {}
 let categoriaAtiva = "Todos";
 let termoBusca = "";
 let ordemAtiva = "padrao";   // padrao (por franquia) | menor | maior preco
@@ -396,6 +400,7 @@ function renderGrid() {
 const CHAVE_QTDS = "chibitoys_qtds_v1";
 let quantidades = {};
 try { quantidades = JSON.parse(localStorage.getItem(CHAVE_QTDS) || "{}") || {}; } catch (e) { quantidades = {}; }
+Object.keys(quantidades).forEach(k => { if (!carrinho.includes(k)) delete quantidades[k]; });
 function salvaQtds() { try { localStorage.setItem(CHAVE_QTDS, JSON.stringify(quantidades)); } catch (e) {} }
 function qtdDe(p) { return p && p.por_unidade ? Math.max(1, Math.min(99, quantidades[p.nome] || 1)) : 1; }
 function mudaQtd(nome, delta) {
