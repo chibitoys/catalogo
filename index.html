@@ -124,6 +124,16 @@ main { padding: 24px 0 100px; }
 .total-linha { display: flex; justify-content: space-between; align-items: baseline; font-family: "Baloo 2", sans-serif; }
 .total-linha .lbl { font-size: 14px; color: var(--ink-soft); font-family: "Nunito Sans", sans-serif; }
 .total-linha .val { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.como-usar { margin: 12px 0 0; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 10px 14px; max-width: 62ch; }
+.como-usar summary { cursor: pointer; font-weight: 800; font-size: 14px; color: var(--brand-blue-deep); list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.como-usar summary::-webkit-details-marker { display: none; }
+.como-usar summary::after { content: "▾"; font-size: 14px; transition: transform .15s; }
+.como-usar[open] summary::after { transform: rotate(180deg); }
+.como-usar ol { margin: 10px 0 2px; padding: 0; list-style: none; counter-reset: passo; display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; line-height: 1.45; color: var(--ink); }
+.como-usar li { counter-increment: passo; position: relative; padding-left: 29px; }
+.como-usar li::before { content: counter(passo); position: absolute; left: 0; top: 1px; width: 20px; height: 20px; border-radius: 50%; background: var(--brand-blue); color: #fff; font-size: 12px; font-weight: 800; display: grid; place-items: center; }
+.como-usar .curto { display: none; }
+@media (max-width: 640px) { .como-usar .longo { display: none; } .como-usar .curto { display: inline; } }
 .promo { margin: 10px 0 0; display: inline-block; background: var(--brand-yellow-soft); border: 1px solid var(--brand-yellow); color: var(--ink); border-radius: 12px; padding: 7px 12px; font-size: 13.5px; font-weight: 700; max-width: 62ch; }
 .qtd { display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; }
 .qtd button { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--ink); font-size: 16px; font-weight: 800; cursor: pointer; line-height: 1; padding: 0; }
@@ -176,7 +186,16 @@ main { padding: 24px 0 100px; }
     <div class="hero-logo"><img src="logo.png" alt="Logo Chibi Toys"></div>
     <div class="hero-text">
       <h1>Catálogo Chibi Toys</h1>
-      <p>Catálogo atualizado a partir do estoque real da Chibi Toys: bonecos, miniaturas e colecionáveis. Cada produto tem dois preços: no Pix e nas plataformas. Monte o pedido aqui e finalize direto no WhatsApp.</p>
+      <p>Bonecos, miniaturas e colecionáveis do estoque real da Chibi Toys.</p>
+      <details class="como-usar" id="como-usar">
+        <summary>Como funciona o catálogo</summary>
+        <ol>
+          <li><b>Dois valores em cada peça.</b> <span class="longo">O preço no Pix (comprando direto com a gente) e o preço nas plataformas.</span><span class="curto">Pix (direto com a gente) e plataformas.</span></li>
+          <li><b>Encontre rápido.</b> <span class="longo">Use a busca, os filtros de franquia, marca e tipo, e o seletor para ordenar por menor ou maior preço. Toque na foto para ampliar.</span><span class="curto">Busca, filtros e ordem por preço.</span></li>
+          <li><b>Monte o carrinho.</b> <span class="longo">Toque em "Adicionar ao carrinho". Ele mostra o subtotal e quanto falta para o desconto por quantidade.</span><span class="curto">Veja o subtotal e o desconto.</span></li>
+          <li><b>Envie o pedido.</b> <span class="longo">O carrinho vai pronto na mensagem, pelo canal que for melhor para você: WhatsApp, Messenger ou Instagram.</span><span class="curto">Por WhatsApp, Messenger ou Instagram.</span></li>
+        </ol>
+      </details>
       <p class="promo">🎁 3 itens: 5% de desconto no Pix · 5 ou mais: 10%</p>
     </div>
     <div class="hero-stat"><div class="num" id="contagem-disponivel">0</div><div class="lbl">disponíveis&nbsp;agora</div></div>
@@ -265,6 +284,7 @@ const LINK_INSTAGRAM = "https://ig.me/m/chibi.toysbr";
 const DIAS_RECENTE = 30;
 const ORDEM_FRANQUIAS = ["Pokémon", "Anime e Jogos", "Disney e Pixar", "Desenhos e Animações", "Heróis e Vilões", "Mascotes e Brindes", "Outros"];
 const EH_CELULAR = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+document.getElementById('como-usar').open = window.innerWidth >= 720;   // guia aberto no computador, recolhido no celular
 const CHAVE_CARRINHO = "chibitoys_carrinho_v1";
 function formataPreco(v) { return "R$ " + v.toLocaleString('pt-BR', { minimumFractionDigits: Number.isInteger(v) ? 0 : 2, maximumFractionDigits: 2 }); }
 function carregaCarrinho() { try { const raw = localStorage.getItem(CHAVE_CARRINHO); return raw ? JSON.parse(raw) : []; } catch (e) { return []; } }
