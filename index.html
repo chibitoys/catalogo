@@ -264,18 +264,26 @@ function tagsDoProduto(p) {
 function produtoTemChip(p, chave) { return tagsDoProduto(p).includes(chave); }
 const ROTULOS_ESPECIAIS = { "x:Lote": "Lotes", "x:Antigo": "Antigos" };
 function rotuloChip(chave) { return ROTULOS_ESPECIAIS[chave] || chave.slice(2); }
-// selos do card / visualizador: franquia + (marca, ou o tipo quando nao for um boneco comum)
+// Categorias que NAO aparecem no catalogo (nem como filtro, nem como selo no card):
+//  - as que voce pediu pra tirar (CATEGORIAS_OCULTAS) e
+//  - qualquer uma com menos de MIN_ITENS_CATEGORIA produtos (volta sozinha quando juntar produtos suficientes).
+// Os produtos continuam aparecendo normalmente em "Todos".
+const MIN_ITENS_CATEGORIA = 4;
+const CATEGORIAS_OCULTAS = new Set(["t:Chaveiro", "m:Sadia", "m:Nestlé", "m:Giraffas"]);
+const CONTAGEM_TAGS = (() => { const c = {}; PRODUTOS.forEach(p => tagsDoProduto(p).forEach(k => { c[k] = (c[k] || 0) + 1; })); return c; })();
+const categoriaVisivel = k => !CATEGORIAS_OCULTAS.has(k) && (CONTAGEM_TAGS[k] || 0) >= MIN_ITENS_CATEGORIA;
+// selos do card / visualizador: franquia + (marca, ou o tipo quando nao for um boneco comum), so os de categoria visivel
 function chipsDoProduto(p) {
-  const s = [p.franquia];
-  if (p.marca) s.push(p.marca); else if (p.tipo && p.tipo !== "Boneco") s.push(p.tipo);
-  return s;
+  const chaves = ["f:" + p.franquia];
+  if (p.marca) chaves.push("m:" + p.marca); else if (p.tipo && p.tipo !== "Boneco") chaves.push("t:" + p.tipo);
+  return chaves.filter(categoriaVisivel).map(rotuloChip);
 }
 function gruposDeFiltro() {
   const cont = {};
   PRODUTOS.forEach(p => tagsDoProduto(p).forEach(k => { cont[k] = (cont[k] || 0) + 1; }));
   // franquias: ordem fixa (a mesma das pastas); marcas/tipos: mais produtos primeiro, "Outros" sempre por ultimo
   const pos = k => { const i = ORDEM_FRANQUIAS.indexOf(k.slice(2)); return i < 0 ? 99 : i; };
-  const grupo = pre => Object.keys(cont).filter(k => k.startsWith(pre))
+  const grupo = pre => Object.keys(cont).filter(k => k.startsWith(pre) && categoriaVisivel(k))
     .sort(pre === "f:" ? ((a, b) => pos(a) - pos(b)) : ((a, b) => cont[b] - cont[a] || a.localeCompare(b)));
   return { cont, grupos: [grupo("f:"), grupo("m:"), grupo("t:").filter(k => k !== "t:Boneco"), grupo("x:")] };
 }
