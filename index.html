@@ -306,7 +306,7 @@ let minhasReservas = carregaMinhasReservas();
 function salvaMinhasReservas() { try { localStorage.setItem(CHAVE_RESERVAS, JSON.stringify(minhasReservas)); } catch (e) {} }
 const ORDEM_FRANQUIAS = ["Pokémon", "Anime e Jogos", "Disney e Pixar", "Desenhos e Animações", "Heróis e Vilões", "Mascotes e Brindes", "Outros"];
 const EH_CELULAR = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-document.getElementById('como-usar').open = window.innerWidth >= 720;   // guia aberto no computador, recolhido no celular
+// o guia "Como funciona?" abre FECHADO em qualquer tela; a pessoa abre se quiser (sem o atributo "open" no HTML)
 const CHAVE_CARRINHO = "chibitoys_carrinho_v1";
 function formataPreco(v) { return "R$ " + v.toLocaleString('pt-BR', { minimumFractionDigits: Number.isInteger(v) ? 0 : 2, maximumFractionDigits: 2 }); }
 function carregaCarrinho() { try { const raw = localStorage.getItem(CHAVE_CARRINHO); return raw ? JSON.parse(raw) : []; } catch (e) { return []; } }
